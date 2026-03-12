@@ -159,7 +159,7 @@ canvas#rain { position:fixed; inset:0; opacity:0.08; z-index:1; }
 .exp-bar-wrap { width:80px; height:6px; background:var(--green-dark); border:1px solid var(--border); }
 .exp-bar { height:100%; background:var(--green); box-shadow:0 0 6px var(--green); transition:width 0.8s ease; }
 
-.game-main { flex:1; display:grid; grid-template-columns:280px 1fr 300px; gap:1px; background:var(--border); overflow:hidden; }
+.game-main { flex:1; display:grid; grid-template-columns:300px 1fr 300px; gap:1px; background:var(--border); overflow:hidden; }
 
 /* 左パネル */
 .panel-left { background:var(--panel-bg); display:flex; flex-direction:column; overflow:hidden; }
@@ -172,7 +172,7 @@ canvas#rain { position:fixed; inset:0; opacity:0.08; z-index:1; }
 .ticket-badge-critical { font-size:9px; padding:3px 8px; letter-spacing:2px; border:1px solid var(--red); color:#000; background:var(--red); animation:statusBlink 1s ease-in-out infinite; }
 .ticket-title { font-size:14px; margin-bottom:8px; line-height:1.5; }
 .ticket-divider { height:1px; background:linear-gradient(90deg,var(--green-dim),transparent); margin:8px 0; }
-.ticket-desc { font-size:12px; color:#99cc99; line-height:1.8; }
+.ticket-desc { font-size:12px; color:#bbddbb; line-height:1.8; }
 .ticket-desc .hl { color:var(--amber); }
 .ticket-meta { margin-top:10px; display:flex; flex-direction:column; gap:3px; }
 .ticket-meta-row { display:flex; justify-content:space-between; font-size:10px; color:#559966; letter-spacing:1px; }
@@ -387,7 +387,7 @@ textarea.code-editor::selection { background:rgba(0,255,65,0.2); }
 <div class="corner bl"></div><div class="corner br"></div>
 
 <!-- モバイル警告 -->
-<div id="mobileWarning" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:32px;text-align:center;">
+<div id="mobileWarning" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:32px;text-align:center;">
   <div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--red);letter-spacing:4px;">⚠ WARNING</div>
   <div style="font-size:13px;color:var(--amber);line-height:2;max-width:320px;font-family:'Share Tech Mono',monospace;">このゲームはスマートフォンでは<br>正しく動作しません。<br><br>PCのブラウザで開いてください。</div>
   <div style="font-size:11px;color:#336644;line-height:2;max-width:320px;">This game does not work on smartphones.<br>Please open it on a PC browser.</div>
@@ -2409,7 +2409,7 @@ setInterval(() => {
 
 // ARIAタイピング
 // A: モバイル警告（幅が狭い場合のみ。ontouchstartはiframe環境で誤検知するため除外）
-if (window.innerWidth < 900) {
+if (window.innerWidth < 750) {
   document.getElementById('mobileWarning').style.display = 'flex';
 }
 
@@ -2452,13 +2452,13 @@ const TUT_STEPS = {
     },
     {
       target: '.panel-center',
-      arrow: 'arrow-bottom',
+      arrow: 'arrow-top',
       label: 'STEP 2 / 3 — CENTER PANEL',
       text: 'ここがコードエディタ。\nこの黒い画面のコードを\n直接編集してOKよ。',
     },
     {
       target: '.panel-right',
-      arrow: 'arrow-left',
+      arrow: 'arrow-right',
       label: 'STEP 3 / 3 — RIGHT PANEL',
       text: '上がシステムのプレビュー。\n下がテスト結果。\nコードを直したら [ RUN TESTS ] を押して確認して。',
     },
@@ -2472,13 +2472,13 @@ const TUT_STEPS = {
     },
     {
       target: '.panel-center',
-      arrow: 'arrow-bottom',
+      arrow: 'arrow-top',
       label: 'STEP 2 / 3 — CENTER PANEL',
       text: 'This is the code editor.\nYou can edit the code\ndirectly in this black area.',
     },
     {
       target: '.panel-right',
-      arrow: 'arrow-left',
+      arrow: 'arrow-right',
       label: 'STEP 3 / 3 — RIGHT PANEL',
       text: 'Top: system preview.\nBottom: test results.\nFix the code, then press [ RUN TESTS ].',
     },
@@ -2563,6 +2563,11 @@ function tutRender() {
       bubble.style.left   = Math.max(margin, Math.min(window.innerWidth - 280, r.left + r.width/2 - 130)) + 'px';
       bubble.style.top    = '';
       bubble.style.bottom = (window.innerHeight - r.top + 18) + 'px';
+      bubble.style.right  = '';
+    } else if (step.arrow === 'arrow-top') {
+      bubble.style.left   = Math.max(margin, Math.min(window.innerWidth - 280, r.left + r.width/2 - 130)) + 'px';
+      bubble.style.top    = (r.bottom + 18) + 'px';
+      bubble.style.bottom = '';
       bubble.style.right  = '';
     }
   }
