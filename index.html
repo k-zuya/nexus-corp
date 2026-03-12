@@ -198,6 +198,10 @@ canvas#rain { position:fixed; inset:0; opacity:0.08; z-index:1; }
 .panel-topbar { height:32px; background:rgba(0,12,5,0.95); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 0 0 4px; gap:0; flex-shrink:0; overflow:hidden; }
 .tab { font-size:11px; color:var(--green-dim); letter-spacing:1px; padding:0 14px; height:100%; display:flex; align-items:center; border-bottom:2px solid transparent; border-right:1px solid var(--border); cursor:none; transition:all 0.2s; flex-shrink:0; position:relative; }
 .tab.active { color:var(--green); border-bottom-color:var(--green); background:rgba(0,255,65,0.04); }
+.tab.lang-js { background:rgba(0,255,65,0.03); }
+.tab.lang-js.active { background:rgba(0,255,65,0.07); border-bottom-color:var(--green); }
+.tab.lang-java { background:rgba(80,140,255,0.04); }
+.tab.lang-java.active { background:rgba(80,140,255,0.09); border-bottom-color:#4a8aff; color:#7aafff; }
 .tab.done { color:var(--green-dim); border-bottom-color:var(--green-dim); }
 .tab.done::after { content:'✓'; position:absolute; top:4px; right:4px; font-size:9px; color:var(--green); }
 .tab:hover:not(.active) { color:var(--green); background:rgba(0,255,65,0.02); }
@@ -518,6 +522,7 @@ textarea.code-editor::selection { background:rgba(0,255,65,0.2); }
       <div class="sys-status" id="bugsRemaining">⚠ SYSTEM CRITICAL — 1,247 BUGS REMAINING</div>
     </div>
     <div class="header-right">
+      <button onclick="tutStartForce()" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:#336644;background:transparent;border:1px solid #336644;padding:3px 10px;cursor:none;transition:all 0.2s;" onmouseover="this.style.color='#99cc99';this.style.borderColor='#99cc99'" onmouseout="this.style.color='#336644';this.style.borderColor='#336644'">?</button>
       <button id="langBtn" onclick="toggleLang()" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--amber);background:transparent;border:1px solid var(--amber);padding:3px 10px;cursor:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,170,0,0.1)'" onmouseout="this.style.background='transparent'">EN</button>
       <div class="stat"><span id="clock" style="color:#336644;font-size:10px;letter-spacing:1px"></span></div>
     </div>
@@ -1160,7 +1165,7 @@ const result2 = generateReport("E-017", 8);
 console.log(result1);
 console.log(result2);`,
     ariaMessages: [
-      '7番目。<br>…ここからまたJavaScript。<br><span class="danger">undefined</span> が返っている。',
+      '7番目。ここからまたJavaScript。<br>…<span class="danger">undefined</span> が返っている。<br>関数の中を見て。',
       '…関数の中を見て。<br>if文の中で、何かが足りない。',
       '返ってこない、か。<br>……呼んでも、答えが返ってこない。<br>そういうこと、あるわね。',
     ],
@@ -2446,7 +2451,7 @@ const TUT_STEPS = {
   ja: [
     {
       target: '.panel-left',
-      arrow: 'arrow-right',
+      arrow: 'arrow-left',
       label: 'STEP 1 / 3 — LEFT PANEL',
       text: 'ここがARIAのパネル。\nバグの説明と、困ったときのヒントが出るわ。\nよく読んで。',
     },
@@ -2466,7 +2471,7 @@ const TUT_STEPS = {
   en: [
     {
       target: '.panel-left',
-      arrow: 'arrow-right',
+      arrow: 'arrow-left',
       label: 'STEP 1 / 3 — LEFT PANEL',
       text: 'This is ARIA\'s panel.\nBug details and hints appear here.\nRead carefully.',
     },
@@ -2505,6 +2510,12 @@ function tutMarkDone() {
 
 function tutStart() {
   if (!tutShouldShow()) return;
+  tutStep = 0;
+  tutActive = true;
+  document.getElementById('tutOverlay').style.display = '';
+  tutRender();
+}
+function tutStartForce() {
   tutStep = 0;
   tutActive = true;
   document.getElementById('tutOverlay').style.display = '';
@@ -2550,13 +2561,24 @@ function tutRender() {
     const bubbleH = 180; // 大まかな高さ見積もり
     const margin = 16;
     if (step.arrow === 'arrow-right') {
-      bubble.style.left = (r.right + 18) + 'px';
+      // 右2/3にあるパネルなら吹き出しを左側に配置
+      if (r.left > window.innerWidth / 2) {
+        bubble.style.left = (r.left - 280 - 18) + 'px';
+      } else {
+        bubble.style.left = (r.right + 18) + 'px';
+      }
       bubble.style.top  = Math.max(margin, Math.min(window.innerHeight - bubbleH - margin, r.top + 20)) + 'px';
       bubble.style.right = '';
       bubble.style.bottom = '';
     } else if (step.arrow === 'arrow-left') {
-      bubble.style.left = '';
-      bubble.style.right = (window.innerWidth - r.left + 18) + 'px';
+      // panel-left（左端）のときは右側に配置、それ以外は左側に配置
+      if (r.left < window.innerWidth / 3) {
+        bubble.style.left = (r.right + 18) + 'px';
+        bubble.style.right = '';
+      } else {
+        bubble.style.left = '';
+        bubble.style.right = (window.innerWidth - r.left + 18) + 'px';
+      }
       bubble.style.top  = Math.max(margin, Math.min(window.innerHeight - bubbleH - margin, r.top + 20)) + 'px';
       bubble.style.bottom = '';
     } else if (step.arrow === 'arrow-bottom') {
@@ -2881,7 +2903,7 @@ function buildTabBar(s) {
   if (isMultiFile(s)) {
     // マルチファイル：タブを複数生成
     bar.innerHTML = s.files.map((f, i) => `
-      <div class="tab ${i===0?'active':''} ${filesDone.has(i)?'done':''}"
+      <div class="tab ${i===0?'active':''} ${filesDone.has(i)?'done':''} lang-${f.lang}"
            id="tab-${i}" onclick="switchTab(${i})">
         <div class="tab-dot ${f.lang}"></div>${f.name}${!filesDone.has(i) ? ' <span style="color:var(--amber);font-size:9px;margin-left:4px;" title="未修正">●</span>' : ''}
       </div>`).join('');
@@ -2897,7 +2919,7 @@ function buildTabBar(s) {
     // シングルファイル
     const lang = s.lang || 'js';
     bar.innerHTML = `
-      <div class="tab active">
+      <div class="tab active lang-${lang}">
         <div class="tab-dot ${lang}"></div>${s.fileName}
       </div>`;
     stepBar.style.display = 'none';
@@ -2918,7 +2940,7 @@ function switchTab(fileIdx) {
   s.files.forEach((f2, i) => {
     const tab = document.getElementById(`tab-${i}`);
     if (!tab) return;
-    tab.className = `tab ${i===fileIdx?'active':''} ${filesDone.has(i)?'done':''}`;
+    tab.className = `tab ${i===fileIdx?'active':''} ${filesDone.has(i)?'done':''} lang-${s.files[i].lang}`;
     // 未修正マーカー更新
     const pending = !filesDone.has(i);
     const marker = tab.querySelector('.tab-pending-dot');
@@ -3175,6 +3197,10 @@ async function runTests() {
   const s = STAGES[currentStageIdx];
   const f = currentFile();
   const btn = document.getElementById('runBtn');
+  // 連打防止
+  if (btn.disabled) return;
+  btn.disabled = true;
+  setTimeout(() => { btn.disabled = false; }, 1200);
   const code = document.getElementById('codeEditor').value;
 
   // 完了済みファイルは再実行ブロック
@@ -3413,8 +3439,8 @@ async function runTests() {
     }
 
     if (!goodEndSeen && hasError) {
-      // パニックメッセージが既に出ている場合（失敗3回以上）はエラーメッセージを省略
-      if (stageFailCount < 3) {
+      // パニックメッセージ（failCount>=2）やARIAメッセージ（failCount===1）が出てるときは省略
+      if (stageFailCount === 0) {
         addAriaMsg(`<span class="danger">エラーが出ているわ。</span><br>落ち着いてコードを見て。`, true);
       }
     }
@@ -3445,6 +3471,9 @@ function updateBugsRemaining() {
 }
 
 function showClearScreen(s) {
+  // 前回のs8-secretが残っていたら削除
+  const prevSecret = document.querySelector('#clearOverlay .s8-secret');
+  if (prevSecret) prevSecret.remove();
   document.getElementById('clearTitle').textContent = t('clearTitle');
   document.getElementById('clearSub').textContent = `BUG ${s.ticketNum} — ${t('resolved')}`;
   // ⑪ 学習テーマサマリー
