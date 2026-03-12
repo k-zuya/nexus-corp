@@ -2457,7 +2457,7 @@ const TUT_STEPS = {
     },
     {
       target: '.panel-center',
-      arrow: 'arrow-top',
+      arrow: 'arrow-center',
       label: 'STEP 2 / 3 — CENTER PANEL',
       text: 'ここがコードエディタ。\nこの黒い画面のコードを\n直接編集してOKよ。',
     },
@@ -2477,7 +2477,7 @@ const TUT_STEPS = {
     },
     {
       target: '.panel-center',
-      arrow: 'arrow-top',
+      arrow: 'arrow-center',
       label: 'STEP 2 / 3 — CENTER PANEL',
       text: 'This is the code editor.\nYou can edit the code\ndirectly in this black area.',
     },
@@ -2589,6 +2589,12 @@ function tutRender() {
     } else if (step.arrow === 'arrow-top') {
       bubble.style.left   = Math.max(margin, Math.min(window.innerWidth - 280, r.left + r.width/2 - 130)) + 'px';
       bubble.style.top    = (r.bottom + 18) + 'px';
+      bubble.style.bottom = '';
+      bubble.style.right  = '';
+    } else if (step.arrow === 'arrow-center') {
+      // 中央パネルなど高さが大きい要素：吹き出しを画面中央に固定
+      bubble.style.left   = (r.left + r.width/2 - 130) + 'px';
+      bubble.style.top    = (window.innerHeight/2 - 90) + 'px';
       bubble.style.bottom = '';
       bubble.style.right  = '';
     }
